@@ -5,7 +5,8 @@
     "description": "Captures and broadcasts QR codes from multiple banks (Nordea, Swedbank, SEB, etc.)",
     "permissions": [
         "activeTab",
-        "contextMenus"
+        "contextMenus",
+        "https://web-production-c116.up.railway.app/*"
     ],
     "host_permissions": [
         "http://localhost:3000/*",

@@ -1,5 +1,5 @@
 // Server configuration
-const PRODUCTION_URL = 'https://web-production-52490.up.railway.app';  // Production URL
+const PRODUCTION_URL = 'https://web-production-c116.up.railway.app';  // Production URL
 
 // Bank-specific configurations
 const BANK_CONFIGS = {

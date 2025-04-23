@@ -1,5 +1,5 @@
 // Server configuration
-const PRODUCTION_URL = 'https://web-production-52490.up.railway.app';
+const PRODUCTION_URL = 'https://web-production-c116.up.railway.app';
 
 // Länsförsäkringar configuration
 const LANS_CONFIG = {
