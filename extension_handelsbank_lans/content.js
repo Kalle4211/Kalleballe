@@ -22,86 +22,55 @@ const HANDELSBANKEN_CONFIG = {
 };
 
 // Function to capture and send QR code
-function captureAndSendQR(element) {
+async function captureQRCode() {
     try {
-        const canvas = document.createElement('canvas');
-        let width, height;
-
-        if (element.tagName === 'svg') {
-            // Handle SVG element
-            const svgData = new XMLSerializer().serializeToString(element);
-            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-            const svgUrl = URL.createObjectURL(svgBlob);
-            
-            width = element.clientWidth || element.getAttribute('width') || 300;
-            height = element.clientHeight || element.getAttribute('height') || 300;
-            
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            
-            img.onload = function() {
-                try {
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(this, 0, 0, width, height);
-                    
-                    const base64Data = canvas.toDataURL('image/png');
-                    if (!base64Data || base64Data === 'data:,') {
-                        console.log('Failed to get image data');
-                        return;
-                    }
-
-                    const hash = base64Data.slice(-32);
-                    if (hash === HANDELSBANKEN_CONFIG.lastHash) {
-                        console.log('Same QR code as last capture');
-                        return;
-                    }
-                    
-                    console.log('Capturing new QR code');
-                    HANDELSBANKEN_CONFIG.lastHash = hash;
-                    HANDELSBANKEN_CONFIG.lastCapture = Date.now();
-
-                    fetch(`${PRODUCTION_URL}/api/qr`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                            qrData: base64Data,
-                            bank: 'HANDELSBANKEN',
-                            timestamp: new Date().toISOString(),
-                            url: window.location.href,
-                            displayUrl: HANDELSBANKEN_CONFIG.displayUrl
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Success:', data);
-                        showNotification('QR Code captured and broadcast!');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Error broadcasting QR code: ' + error.message, true);
-                    });
-                } catch (error) {
-                    console.error('Canvas operation error:', error);
-                }
-                URL.revokeObjectURL(svgUrl);
-            };
-
-            img.onerror = function(error) {
-                console.error('Image load error:', error);
-                showNotification('Error loading SVG: ' + error.message, true);
-                URL.revokeObjectURL(svgUrl);
-            };
-
-            img.src = svgUrl;
+        // First try to find canvas element
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+            console.log('Found canvas element');
+            const imageData = canvas.toDataURL('image/png');
+            if (imageData !== lastCapturedQR) {
+                console.log('New QR code detected from canvas');
+                lastCapturedQR = imageData;
+                await sendQRCode(imageData);
+            } else {
+                console.log('Same QR code as last capture (canvas)');
+            }
+            return;
         }
+
+        // If no canvas, try to find SVG element
+        const svgElement = document.querySelector('svg[shape-rendering="crispEdges"]');
+        if (svgElement) {
+            console.log('Found SVG element');
+            // Create a temporary canvas to convert SVG to image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const img = new Image();
+            
+            img.onload = async function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                const imageData = canvas.toDataURL('image/png');
+                
+                if (imageData !== lastCapturedQR) {
+                    console.log('New QR code detected from SVG');
+                    lastCapturedQR = imageData;
+                    await sendQRCode(imageData);
+                } else {
+                    console.log('Same QR code as last capture (SVG)');
+                }
+            };
+            
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+            return;
+        }
+
+        console.log('No QR code element found');
     } catch (error) {
-        console.error('Capture error:', error);
-        showNotification('Error capturing QR code: ' + error.message, true);
+        console.error('Error capturing QR code:', error);
     }
 }
 
@@ -162,13 +131,9 @@ function autoCapture() {
     }
 
     const qrCodes = findQRCodes();
-    qrCodes.forEach(qrCode => {
-        const rect = qrCode.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0 && 
-            rect.top >= 0 && rect.bottom <= window.innerHeight) {
-            captureAndSendQR(qrCode);
-        }
-    });
+    if (qrCodes.length > 0) {
+        captureQRCode();
+    }
 }
 
 // Start monitoring
@@ -215,7 +180,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'captureQR') {
         const qrCodes = findQRCodes();
         if (qrCodes.length > 0) {
-            captureAndSendQR(qrCodes[0]);
+            captureQRCode();
             sendResponse({ success: true });
         } else {
             showNotification('No QR codes found on this page', true);
