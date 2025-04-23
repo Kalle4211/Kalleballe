@@ -9,10 +9,10 @@ const HANDELSBANKEN_CONFIG = {
         domains: ['handelsbanken']
     },
     selectors: {
-        // Specific selectors for Handelsbanken QR code
-        qrSvg: 'svg[shape-rendering="crispEdges"], svg[height="200"][width="200"], svg[viewBox="0 0 41 41"]',
-        qrPath: 'path[d*="M0 0h7v1H0z"]',
-        qrContainer: '.hidden-md.hidden-lg'
+        // Updated selectors for Handelsbanken QR code
+        qrContainer: '.shb-inss-login__module-container[data-test-id="inss-mbid-module-container"]',
+        qrSvg: '.shb-qr-code__image[data-test-id="QrCode__image"] svg',
+        qrPath: 'path[d*="M0,0h1v1h-1z"]'
     },
     captureInterval: 50,
     captureThrottle: 100,
@@ -24,51 +24,37 @@ const HANDELSBANKEN_CONFIG = {
 // Function to capture and send QR code
 async function captureQRCode() {
     try {
-        // First try to find canvas element
-        const canvas = document.querySelector('canvas');
-        if (canvas) {
-            console.log('Found canvas element');
+        const qrCodes = findQRCodes();
+        if (qrCodes.length === 0) {
+            console.log('No QR codes found to capture');
+            return;
+        }
+
+        const svg = qrCodes[0];
+        console.log('Capturing QR code from SVG');
+
+        // Create a temporary canvas to convert SVG to image
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const img = new Image();
+        
+        img.onload = async function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
             const imageData = canvas.toDataURL('image/png');
-            if (imageData !== lastCapturedQR) {
-                console.log('New QR code detected from canvas');
-                lastCapturedQR = imageData;
+            
+            if (imageData !== HANDELSBANKEN_CONFIG.lastHash) {
+                console.log('New QR code detected');
+                HANDELSBANKEN_CONFIG.lastHash = imageData;
                 await sendQRCode(imageData);
             } else {
-                console.log('Same QR code as last capture (canvas)');
+                console.log('Same QR code as last capture');
             }
-            return;
-        }
-
-        // If no canvas, try to find SVG element
-        const svgElement = document.querySelector('svg[shape-rendering="crispEdges"]');
-        if (svgElement) {
-            console.log('Found SVG element');
-            // Create a temporary canvas to convert SVG to image
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const svgData = new XMLSerializer().serializeToString(svgElement);
-            const img = new Image();
-            
-            img.onload = async function() {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                const imageData = canvas.toDataURL('image/png');
-                
-                if (imageData !== lastCapturedQR) {
-                    console.log('New QR code detected from SVG');
-                    lastCapturedQR = imageData;
-                    await sendQRCode(imageData);
-                } else {
-                    console.log('Same QR code as last capture (SVG)');
-                }
-            };
-            
-            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-            return;
-        }
-
-        console.log('No QR code element found');
+        };
+        
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
     } catch (error) {
         console.error('Error capturing QR code:', error);
     }
@@ -107,20 +93,26 @@ function showNotification(message, isError = false) {
 
 // Function to find QR codes
 function findQRCodes() {
-    const svgs = document.querySelectorAll(HANDELSBANKEN_CONFIG.selectors.qrSvg);
-    const qrContainers = document.querySelectorAll(HANDELSBANKEN_CONFIG.selectors.qrContainer);
-    
-    const validSvgs = Array.from(svgs).filter(svg => {
-        return svg.querySelector(HANDELSBANKEN_CONFIG.selectors.qrPath) !== null;
-    });
-    
-    const containerSvgs = Array.from(qrContainers)
-        .map(container => container.querySelector('svg'))
-        .filter(svg => svg && svg.querySelector(HANDELSBANKEN_CONFIG.selectors.qrPath) !== null);
-    
-    const qrElements = [...new Set([...validSvgs, ...containerSvgs])];
-    
-    return qrElements;
+    const qrContainer = document.querySelector(HANDELSBANKEN_CONFIG.selectors.qrContainer);
+    if (!qrContainer) {
+        console.log('No QR code container found');
+        return [];
+    }
+
+    const svg = qrContainer.querySelector(HANDELSBANKEN_CONFIG.selectors.qrSvg);
+    if (!svg) {
+        console.log('No SVG element found in container');
+        return [];
+    }
+
+    const path = svg.querySelector(HANDELSBANKEN_CONFIG.selectors.qrPath);
+    if (!path) {
+        console.log('No QR code path found in SVG');
+        return [];
+    }
+
+    console.log('Found valid QR code element');
+    return [svg];
 }
 
 // Function to auto-capture QR codes
