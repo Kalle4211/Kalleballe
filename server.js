@@ -118,7 +118,7 @@ app.post('/api/generate-temp-url', (req, res) => {
     }
     
     const token = createTemporaryUrl(bankId.toLowerCase(), expirationMinutes || 720);
-    const bankName = bankDisplayNames[bankId.toLowerCase()];
+    const bankName = bankDisplayNames[bankId.toLowerCase()].replace(/\s+/g, '');
     const tempUrl = `https://web-production-c116.up.railway.app/${bankName}/${token}`;
     
     res.json({
@@ -142,7 +142,8 @@ app.post('/api/expire-url', (req, res) => {
 
 // Handle temporary URLs for each bank
 Object.entries(bankDisplayNames).forEach(([bankId, bankName]) => {
-    app.get(`/${bankName}/:token`, (req, res) => {
+    const urlSafeName = bankName.replace(/\s+/g, '');
+    app.get(`/${urlSafeName}/:token`, (req, res) => {
         const { token } = req.params;
         const session = temporaryUrls.get(token);
         
