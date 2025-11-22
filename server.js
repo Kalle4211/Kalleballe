@@ -121,7 +121,7 @@ app.post('/api/generate-temp-url', (req, res) => {
     
     const token = createTemporaryUrl(bankId.toLowerCase(), expirationMinutes || 720);
     const bankName = bankDisplayNames[bankId.toLowerCase()].replace(/\s+/g, '');
-    const tempUrl = `https://web-production-c116.up.railway.app/${bankName}/${token}`;
+    const tempUrl = `https://web-production-72c0d.up.railway.app/${bankName}/${token}`;
     
     res.json({
         url: tempUrl,
