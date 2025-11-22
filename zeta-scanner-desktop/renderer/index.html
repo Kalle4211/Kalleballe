@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Zeta Scanner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="header" id="drag-header">Zeta Scanner v3.2</div>
+        <div class="preview-container" id="viewport">
+            <!-- This area is now a completely transparent hole -->
+        </div>
+        <div class="footer">
+            <div class="status" id="status-bar">Drag frame over target</div>
+            <div class="controls">
+                <button id="start-scan-btn">Start Scan</button>
+                <button id="stop-scan-btn" class="hidden">Stop Scan</button>
+            </div>
+        </div>
+    </div>
+    <script src="./renderer.js"></script>
+</body>
+</html>

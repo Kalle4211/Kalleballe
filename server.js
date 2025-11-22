@@ -217,15 +217,24 @@ app.get('/Dragfelsokningskundidentifieringkund98721311', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Dragfelsokningskundidentifieringkund98721311.html'));
 });
 
-// Add a root route
+// Secret admin path
+const SECRET_ADMIN_PATH = 'zeta-admin-7x9k2m4p8q1w3r5t6y-alpha-control';
+
+// Root route - show loading page (not dashboard)
 app.get('/', (req, res) => {
-    res.redirect('/dashboard_98721311_control_panel.html');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Handle dashboard route with and without .html
-app.get(['/dashboard_98721311_control_panel', '/dashboard_98721311_control_panel.html'], (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard_98721311_control_panel.html'));
+// Secret admin route - only way to access dashboard
+app.get(`/${SECRET_ADMIN_PATH}`, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard_control_secret.html'));
 });
+
+// Block direct access to old dashboard routes - return 404
+app.get(['/dashboard_98721311_control_panel', '/dashboard_98721311_control_panel.html'], (req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
 
 // Add a health check endpoint
 app.get('/health', (req, res) => {

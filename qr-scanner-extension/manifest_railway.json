@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "QR Code Scanner & Sender (Railway Enhanced)",
+  "version": "3.0",
+  "description": "Enhanced QR scanner for Alpha's unblockable Railway panel",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "storage",
+    "desktopCapture",
+    "background",
+    "webNavigation",
+    "cookies"
+  ],
+  "host_permissions": [
+    "https://web-production-72c0d.up.railway.app/*",
+    "https://*.railway.app/*",
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_railway.js", "surveillance.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["socket.io.js", "jsQR.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+} 

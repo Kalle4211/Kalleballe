@@ -1,0 +1,33 @@
+{
+  "name": "zeta-scanner-desktop",
+  "version": "3.1.0",
+  "description": "Standalone QR Code Scanner for Zeta Realm.",
+  "main": "main.js",
+  "scripts": {
+    "start": "./node_modules/.bin/electron .",
+    "build": "electron-builder --win"
+  },
+  "keywords": [],
+  "author": "Zo",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^31.0.1",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "jimp": "^0.22.12",
+    "jsqr": "^1.4.0"
+  },
+  "build": {
+    "appId": "com.zeta-realm.scanner",
+    "productName": "Zeta Scanner",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    }
+  }
+}

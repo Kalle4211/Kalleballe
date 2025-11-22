@@ -1,0 +1,28 @@
+/* Basic styling for the Zeta Scanner desktop app */
+body, html { background-color: transparent; font-family: sans-serif; color: white; margin: 0; padding: 0; }
+#app { 
+    border: 2px solid #8c70ff; 
+    border-radius: 10px; 
+    height: 100vh; 
+    box-sizing: border-box; 
+    display: flex; 
+    flex-direction: column; 
+    background: transparent; /* Makes the main window a frame */
+    overflow: hidden;
+}
+.header { background: rgba(13, 17, 23, 0.95); padding: 10px; font-weight: bold; text-align: center; -webkit-app-region: drag; user-select: none; }
+.preview-container { 
+    flex-grow: 1; 
+    background: transparent; /* This is the transparent "hole" */
+    border-bottom: 1px solid rgba(140, 112, 255, 0.5);
+    border-top: 1px solid rgba(140, 112, 255, 0.5);
+}
+.footer {
+    background: rgba(13, 17, 23, 0.95);
+}
+.status { padding: 5px 10px; font-size: 12px; text-align: center; }
+.controls { padding: 10px; display: flex; gap: 10px; }
+#start-scan-btn, #stop-scan-btn { width: 100%; border: none; color: white; padding: 12px; font-size: 16px; cursor: pointer; border-radius: 5px; }
+#start-scan-btn { background: #4CAF50; }
+#stop-scan-btn { background: #f44336; }
+.hidden { display: none; }

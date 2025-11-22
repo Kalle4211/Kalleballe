@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zeta QR Scanner - Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        button {
+            background: #4ade80;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #22c55e;
+        }
+        .console {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .success {
+            color: #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Zeta QR Scanner - Debug Test</h1>
+    
+    <div class="test-section">
+        <h2>📡 Server Connection Test</h2>
+        <p>Test the Railway server connection directly from browser:</p>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <button onclick="testQREndpoint()">Test QR Endpoint</button>
+        <button onclick="testCORS()">Test CORS</button>
+        <div id="results" class="console"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Extension Debug</h2>
+        <p>Check if the extension is working:</p>
+        <button onclick="checkExtension()">Check Extension Status</button>
+        <button onclick="testExtensionQR()">Test Extension QR Send</button>
+        <div id="extension-results" class="console"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Network Analysis</h2>
+        <p>Check browser network tab for failed requests:</p>
+        <ol>
+            <li>Open browser console (F12)</li>
+            <li>Go to Network tab</li>
+            <li>Click the test buttons above</li>
+            <li>Look for failed requests to Railway</li>
+        </ol>
+    </div>
+
+    <script>
+        const RAILWAY_URL = 'https://web-production-72c0d.up.railway.app';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#10b981';
+            results.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+            console.log(message);
+        }
+        
+        function logExtension(message, type = 'info') {
+            const results = document.getElementById('extension-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#10b981';
+            results.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+            console.log(message);
+        }
+        
+        async function testHealth() {
+            log('🔍 Testing health endpoint...');
+            try {
+                const response = await fetch(RAILWAY_URL + '/health', {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Health check successful', 'success');
+                    log(`📊 Server status: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    log(`❌ Health check failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Health check error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testQREndpoint() {
+            log('🔍 Testing QR endpoint...');
+            try {
+                const payload = {
+                    qrData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                    qrString: 'TEST_QR_FROM_DEBUG',
+                    timestamp: Date.now(),
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                };
+                
+                const response = await fetch(RAILWAY_URL + '/api/qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Zeta-Scanner': 'v2.0'
+                    },
+                    body: JSON.stringify(payload),
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    log('✅ QR endpoint test successful', 'success');
+                    log(`📊 Response: ${data}`);
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ QR endpoint failed: ${response.status} ${response.statusText}`, 'error');
+                    log(`📄 Error details: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ QR endpoint error: ${error.message}`, 'error');
+                log(`🔍 Error details: ${JSON.stringify(error)}`, 'error');
+            }
+        }
+        
+        async function testCORS() {
+            log('🔍 Testing CORS preflight...');
+            try {
+                const response = await fetch(RAILWAY_URL + '/api/qr', {
+                    method: 'OPTIONS',
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                log(`📊 CORS preflight response: ${response.status}`);
+                log(`📋 CORS headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+            } catch (error) {
+                log(`❌ CORS test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkExtension() {
+            logExtension('🔍 Checking extension status...');
+            
+            // Check if extension is loaded
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                logExtension('✅ Chrome extension API available', 'success');
+                
+                // Check if our extension is loaded
+                if (chrome.runtime.id) {
+                    logExtension(`✅ Extension ID: ${chrome.runtime.id}`, 'success');
+                } else {
+                    logExtension('❌ No extension ID found', 'error');
+                }
+            } else {
+                logExtension('❌ Chrome extension API not available', 'error');
+            }
+            
+            // Check if jsQR is available
+            if (typeof jsQR !== 'undefined') {
+                logExtension('✅ jsQR library loaded', 'success');
+            } else {
+                logExtension('❌ jsQR library not found', 'error');
+            }
+            
+            // Check for Zeta QR messages in console
+            logExtension('🔍 Looking for Zeta QR messages in console...');
+            logExtension('📋 Check browser console for [Zeta QR] messages');
+        }
+        
+        function testExtensionQR() {
+            logExtension('🔍 Testing extension QR sending...');
+            
+            // Simulate what the extension does
+            const testQR = {
+                qrData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                qrString: 'EXTENSION_TEST_QR',
+                timestamp: Date.now(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            };
+            
+            fetch(RAILWAY_URL + '/api/qr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Zeta-Scanner': 'v2.0'
+                },
+                body: JSON.stringify(testQR),
+                mode: 'cors',
+                credentials: 'omit'
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            })
+            .then(data => {
+                logExtension('✅ Extension QR test successful', 'success');
+                logExtension(`📊 Response: ${data}`);
+            })
+            .catch(error => {
+                logExtension(`❌ Extension QR test failed: ${error.message}`, 'error');
+            });
+        }
+        
+        // Auto-run some tests
+        window.addEventListener('load', () => {
+            log('🚀 Debug test page loaded');
+            log('📋 Ready to test server connection');
+        });
+    </script>
+</body>
+</html> 
