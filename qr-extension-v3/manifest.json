@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Zeta Scanner 3.0 (Clean Build)",
+  "version": "3.0.1",
+  "description": "The un-errorable, client-side decoding QR scanner.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_title": "Open Zeta Scanner 3.0"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["jsQR.min.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -13,7 +13,7 @@
    - **COPY THE TOKEN IMMEDIATELY** (you won't see it again!)
 
 2. **When pushing, use the token as password:**
-   - Username: `martenlarsson09`
+   - Username: `kalleballe243`
    - Password: `[paste your token here]`
 
 ### Option 2: Update Remote URL with Token
@@ -21,8 +21,12 @@
 If you have your token ready, you can update the remote URL:
 
 ```bash
-git remote set-url origin https://YOUR_TOKEN@github.com/martenlarsson09/skolproject.git
+git remote set-url origin https://YOUR_TOKEN@github.com/kalleballe243/kalleballe.git
 ```
+
+Replace `YOUR_TOKEN` with your actual Personal Access Token (e.g., `Kalleballe12345!`).
+
+### Step 3: Verify
 
 Then push normally:
 ```bash
@@ -35,7 +39,9 @@ If you prefer SSH keys, you can set up SSH authentication instead.
 
 ---
 
-**Note:** The repository must exist at: `https://github.com/martenlarsson09/skolproject`
+**Important:** Make sure you have created the repository on your GitHub account before pushing.
 
-If it doesn't exist, create it on GitHub first!
+**Note:** The repository must exist at: `https://github.com/kalleballe243/kalleballe`
+
+## Troubleshooting
 

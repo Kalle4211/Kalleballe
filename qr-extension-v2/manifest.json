@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Zeta Realm QR Scanner 3.0",
+  "version": "3.0",
+  "description": "Overlay-only QR code scanner that decodes on the client-side.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_title": "Open Zeta QR Scanner"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["jsQR.min.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

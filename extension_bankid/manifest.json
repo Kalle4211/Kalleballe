@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "BankID QR Code Capture",
+    "version": "1.0",
+    "description": "Captures QR codes from various bank login pages",
+    "permissions": [
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_icon": {
+            "48": "icon48.png"
+        }
+    },
+    "icons": {
+        "48": "icon48.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": ["content.js"]
+        }
+    ]
+} 

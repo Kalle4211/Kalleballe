@@ -1,5 +1,5 @@
 // Server configuration
-const PRODUCTION_DOMAIN = 'web-production-72c0d.up.railway.app';
+const PRODUCTION_DOMAIN = 'web-production-c116.up.railway.app';
 const PRODUCTION_URL = `https://${PRODUCTION_DOMAIN}`;
 
 // Bank-specific URLs

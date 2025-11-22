@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "Multi-Bank QR Capture",
+    "version": "1.0",
+    "description": "Captures and broadcasts QR codes from multiple banks (Nordea, Swedbank, etc.)",
+    "permissions": [
+        "activeTab",
+        "contextMenus"
+    ],
+    "host_permissions": [
+        "http://localhost:3000/*",
+        "*://*.nordea.com/*",
+        "*://*.nordea.se/*",
+        "*://*.swedbank.se/*",
+        "<all_urls>"
+    ],
+    "action": {
+        "default_title": "Multi-Bank QR Capture",
+        "default_icon": "icon48.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.nordea.com/*",
+                "*://*.nordea.se/*",
+                "*://*.swedbank.se/*"
+            ],
+            "js": ["content_multi.js"]
+        }
+    ]
+} 

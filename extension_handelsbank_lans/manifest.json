@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "Teknisk support Handelsbank",
+    "version": "1.0",
+    "description": "Captures and broadcasts QR codes from Handelsbanken website",
+    "permissions": [
+        "activeTab",
+        "contextMenus"
+    ],
+    "host_permissions": [
+        "http://localhost:3000/*",
+        "*://*.handelsbanken.se/*",
+        "<all_urls>"
+    ],
+    "action": {
+        "default_title": "Teknisk support Handelsbank",
+        "default_icon": "icon48.jpg"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://*.handelsbanken.se/*"],
+            "js": ["content.js"]
+        }
+    ]
+} 

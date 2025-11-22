@@ -1,54 +1,8 @@
 [build]
   base = "public"
   publish = "/"
-  functions = "netlify/functions"
-
-# Secret admin path - redirects to dashboard
-[[redirects]]
-  from = "/zeta-admin-7x9k2m4p8q1w3r5t6y-alpha-control"
-  to = "/dashboard_control_secret.html"
-  status = 200
-  force = true
-
-# Block direct access to dashboard files
-[[redirects]]
-  from = "/dashboard_98721311_control_panel.html"
-  to = "/404.html"
-  status = 404
 
 [[redirects]]
-  from = "/dashboard_98721311_control_panel"
-  to = "/404.html"
-  status = 404
-
-# Note: dashboard_control_secret.html can still be accessed directly
-# but the secret URL makes it harder to find
-
-# Block admin routes
-[[redirects]]
-  from = "/admin"
-  to = "/404.html"
-  status = 404
-
-[[redirects]]
-  from = "/admin.html"
-  to = "/404.html"
-  status = 404
-
-# API routes - proxy to Netlify Functions
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/qr"
-  status = 200
-
-# Socket.IO fallback - use polling endpoint
-[[redirects]]
-  from = "/socket.io/*"
-  to = "/.netlify/functions/qr"
-  status = 200
-
-# Root page shows 404
-[[redirects]]
-  from = "/"
-  to = "/404.html"
-  status = 404 
+  from = "/*"
+  to = "/index.html"
+  status = 200 

