@@ -277,7 +277,7 @@ app.get('/api/qr', (req, res) => {
     });
 });
 
-app.post('/api/qr', (req, res) => {
+app.post('/api/qr', async (req, res) => {
     const sourceIP = req.ip;
     const sourceIdentifier = req.get('X-Forwarded-For') || req.socket.remoteAddress;
     const origin = req.get('origin'); // e.g., chrome-extension://...
