@@ -295,6 +295,18 @@
                         qrDisplay.src = data.qrData;
                         qrDisplay.style.display = 'block';
                         loadingContainer.style.display = 'none';
+                    } else {
+                        // It's not a base64 image, assume it's raw text to be converted
+                        console.log("Received raw text, generating QR code client-side:", data.data);
+                        qrDisplay.innerHTML = ''; // Clear previous QR code
+                        new QRCode(qrDisplay, {
+                            text: data.data,
+                            width: 256,
+                            height: 256,
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                        loadingContainer.style.display = 'none';
+                        qrDisplay.style.display = 'block';
                     }
                 }
             } catch (error) {
