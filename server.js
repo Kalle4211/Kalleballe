@@ -251,6 +251,12 @@ app.get('/health', (req, res) => {
 
 // Add API routes
 app.get('/api/qr', (req, res) => {
+    // FORCE NO CACHING
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+
     // This is the new polling endpoint
     if (req.query.since && latestQrData.timestamp && parseInt(req.query.since) >= latestQrData.timestamp) {
         // Client is up to date, no new data
