@@ -297,24 +297,26 @@ app.post('/api/qr', (req, res) => {
     }
 
     try {
-        // Validate base64 image data
+        let finalQrData = qrData;
+
+        // If it's not an image (raw text), generate a QR code from it
         if (!qrData.startsWith('data:image/')) {
-            console.error('Invalid image data format');
-            throw new Error('Invalid image data');
+            console.log('[ZETA LOG] Received raw text in POST. Generating QR code...');
+            finalQrData = await QRCode.toDataURL(qrData);
         }
 
         // STORE the latest QR data
-        latestQrData = { qrData: qrData, timestamp: Date.now() };
+        latestQrData = { qrData: finalQrData, timestamp: Date.now() };
 
         // If session token is provided, store QR for that session
         if (sessionToken && temporaryUrls.has(sessionToken)) {
             console.log('Storing QR for session:', sessionToken);
-            temporaryUrls.get(sessionToken).qrData = qrData;
+            temporaryUrls.get(sessionToken).qrData = finalQrData;
         }
 
         // Broadcast to all connected clients
         console.log('Broadcasting QR to', connectedDisplays.size, 'displays');
-        io.emit('new_qr', qrData);
+        io.emit('new_qr', finalQrData);
         
         // Log success (helpful for debugging)
         console.log('QR code broadcast successful');
@@ -400,10 +402,8 @@ app.use((req, res, next) => {
 // Export the app and http server
 module.exports = http;
 
-// Start the server if not being run by Vercel
-if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 3000;
-    http.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });
-} 
+// Start the server
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+}); 
