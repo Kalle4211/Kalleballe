@@ -303,16 +303,29 @@ app.post('/api/qr', (req, res) => {
             throw new Error('Invalid image data');
         }
 
-        // When the server receives raw text, it will now just store it as-is.
-        // The client (bank page) will be responsible for generating the QR code.
-        console.log('[ZETA LOG] Storing raw text data directly.');
-        latestQrData = { data: qrData, timestamp: Date.now(), isRawText: true };
-        io.emit('new_qr', { data: qrData, isRawText: true });
-        res.status(200).send({ message: 'Raw QR text received and stored' });
+        // STORE the latest QR data
+        latestQrData = { qrData: qrData, timestamp: Date.now() };
 
+        // If session token is provided, store QR for that session
+        if (sessionToken && temporaryUrls.has(sessionToken)) {
+            console.log('Storing QR for session:', sessionToken);
+            temporaryUrls.get(sessionToken).qrData = qrData;
+        }
+
+        // Broadcast to all connected clients
+        console.log('Broadcasting QR to', connectedDisplays.size, 'displays');
+        io.emit('new_qr', qrData);
+        
+        // Log success (helpful for debugging)
+        console.log('QR code broadcast successful');
+        
+        res.status(200).json({ 
+            message: 'QR code broadcast successful',
+            activeDisplays: Array.from(connectedDisplays)
+        });
     } catch (error) {
-        console.error('Error generating QR code from raw text:', error);
-        return res.status(500).send({ message: 'Error generating QR from text' });
+        console.error('Error processing QR code:', error);
+        res.status(400).json({ error: 'Invalid QR code data' });
     }
 });
 
