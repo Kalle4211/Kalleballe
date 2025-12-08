@@ -273,53 +273,59 @@
         </div>
     </main>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
         const qrDisplay = document.getElementById('qrDisplay');
         const loadingContainer = document.getElementById('loadingContainer');
-        const displayId = '98721311';
+        let lastQRTimestamp = null; // Track last received QR
 
-        socket.on('new_qr', (qrData) => {
-            if (qrData && qrData !== '') {
-                qrDisplay.src = qrData;
-                qrDisplay.style.display = 'block';
-                loadingContainer.style.display = 'none';
-            } else {
-                qrDisplay.style.display = 'none';
-                loadingContainer.style.display = 'flex';
+        // HTTP Polling for QR codes
+        async function pollForQRCode() {
+            try {
+                const url = lastQRTimestamp 
+                    ? `/api/qr?since=${lastQRTimestamp}`
+                    : '/api/qr';
+                
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.updated && data.qrData) {
+                        lastQRTimestamp = data.timestamp;
+                        qrDisplay.src = data.qrData;
+                        qrDisplay.style.display = 'block';
+                        loadingContainer.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                // Polling errors are common, just log quietly
+                // console.log('Polling error:', error);
             }
-        });
+        }
 
-        socket.on('disconnect', () => {
-            qrDisplay.style.display = 'none';
-            loadingContainer.style.display = 'flex';
-        });
-
-        // Prevent right-click
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        // Start polling every 2 seconds
+        setInterval(pollForQRCode, 2000);
         
-        // Prevent keyboard shortcuts
+        // Initial poll after a short delay
+        setTimeout(pollForQRCode, 500);
+
+        // --- Security & UX ---
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.altKey || e.metaKey) {
                 e.preventDefault();
             }
         });
-
-        // Keep display awake
         async function keepAwake() {
             try {
                 if ('wakeLock' in navigator) {
-                    const wakeLock = await navigator.wakeLock.request('screen');
+                    await navigator.wakeLock.request('screen');
                 }
             } catch (err) {
-                console.log('Wake Lock error:', err);
+                // console.log('Wake Lock error:', err);
             }
         }
         keepAwake();
-
-        // Register display
-        socket.emit('register_display', displayId);
     </script>
 </body>
 </html> 
