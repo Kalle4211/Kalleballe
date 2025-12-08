@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 0;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+      padding-bottom: 10px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .stat-item {
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffd700;
+    }
+    
+    .status-section {
+      background: rgba(255,255,255,0.1);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .server-status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    
+    .server-status.connected {
+      background: rgba(76, 175, 80, 0.3);
+      color: #4caf50;
+    }
+    
+    .server-status.disconnected {
+      background: rgba(244, 67, 54, 0.3);
+      color: #f44336;
+    }
+    
+    .control-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-start {
+      background: #4caf50;
+      color: white;
+      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-stop {
+      background: #f44336;
+      color: white;
+      box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔥 Zeta QR Scanner V2</h1>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-label">Total Scans</div>
+      <div class="stat-value" id="totalScans">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Successful Sends</div>
+      <div class="stat-value" id="successfulSends">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Failed Sends</div>
+      <div class="stat-value" id="failedSends">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Last Found</div>
+      <div class="stat-value" id="lastFound">-</div>
+    </div>
+  </div>
+  
+  <div class="status-section">
+    <div class="status-item">
+      <span>Scanner Status:</span>
+      <span id="scannerStatus">Active</span>
+    </div>
+    <div class="status-item">
+      <span>Server:</span>
+      <span id="serverUrl">Railway V2</span>
+    </div>
+    <div class="status-item">
+      <span>Connection:</span>
+      <span id="serverStatus" class="server-status connected">✅ Connected to Railway V2</span>
+    </div>
+  </div>
+
+  <div class="control-section">
+    <button id="startBtn" class="btn btn-start">▶ START</button>
+    <button id="stopBtn" class="btn btn-stop">⏹ STOP</button>
+  </div>
+  
+  <div class="footer">
+    Enhanced QR Scanner for Zeta Realm
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

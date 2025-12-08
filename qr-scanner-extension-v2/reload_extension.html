@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zeta QR Scanner - Extension Reload Helper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .step {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4ade80;
+        }
+        .error {
+            border-left-color: #ef4444;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+        }
+        button {
+            background: #4ade80;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #22c55e;
+        }
+        .console {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Zeta QR Scanner - Extension Reload Helper</h1>
+    
+    <div class="container">
+        <h2>📋 Reload Instructions</h2>
+        
+        <div class="step">
+            <h3>1. Open Chrome Extensions</h3>
+            <p>Go to: <code>chrome://extensions/</code></p>
+            <button onclick="window.open('chrome://extensions/')">Open Extensions</button>
+        </div>
+        
+        <div class="step">
+            <h3>2. Enable Developer Mode</h3>
+            <p>Toggle "Developer mode" in the top right corner</p>
+        </div>
+        
+        <div class="step">
+            <h3>3. Reload Extension</h3>
+            <p>Find "Zeta Enhanced QR Scanner" and click the refresh button</p>
+        </div>
+        
+        <div class="step">
+            <h3>4. Test Extension</h3>
+            <p>Open browser console (F12) and look for these messages:</p>
+            <div class="console">
+🚀 [Zeta QR] ENHANCED SCANNER INITIALIZED
+🔍 [Zeta QR] Checking server connection...
+✅ [Zeta QR] Server connection healthy
+🧪 [Zeta QR] Testing server connection with dummy QR...
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>🔧 Troubleshooting</h2>
+        
+        <div class="step warning">
+            <h3>Extension Context Invalidated Error</h3>
+            <p>This happens when the extension is reloaded while running. The new version should handle this automatically.</p>
+        </div>
+        
+        <div class="step error">
+            <h3>If Extension Won't Load</h3>
+            <ul>
+                <li>Check that all files are in the correct folder</li>
+                <li>Verify manifest.json is valid JSON</li>
+                <li>Ensure jsQR.min.js is present</li>
+                <li>Try removing and re-adding the extension</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <h3>Test QR Codes</h3>
+            <p>Go to the test page to verify QR scanning works:</p>
+            <button onclick="window.open('test.html')">Open Test Page</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>📊 Expected Behavior</h2>
+        
+        <div class="step">
+            <h3>✅ Success Indicators</h3>
+            <ul>
+                <li>Extension loads without errors</li>
+                <li>Console shows initialization messages</li>
+                <li>Popup shows "Connected to Railway"</li>
+                <li>Statistics counters work</li>
+                <li>QR codes are detected and sent</li>
+            </ul>
+        </div>
+        
+        <div class="step error">
+            <h3>❌ Problem Indicators</h3>
+            <ul>
+                <li>Extension won't load</li>
+                <li>Console shows errors</li>
+                <li>Popup shows "Server Unreachable"</li>
+                <li>No QR codes being detected</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Add some helpful console messages
+        console.log('🚀 Zeta QR Scanner Reload Helper Loaded');
+        console.log('📋 Follow the steps above to reload the extension');
+        console.log('🔧 If you see errors, check the troubleshooting section');
+    </script>
+</body>
+</html> 

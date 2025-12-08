@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "🔥 Zeta QR Scanner V2",
+  "version": "2.0.0",
+  "description": "Enhanced QR Scanner for Zeta Realm - Railway V2 Edition",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://web-production-72c0d.up.railway.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["jsQR.min.js", "html5-qrcode.min.js", "content.js", "surveillance.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "🔥 Zeta QR Scanner V2"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zeta QR Scanner V2 Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .qr-container { margin: 20px 0; }
+        .status { padding: 10px; background: #f0f0f0; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Zeta QR Scanner V2 Test Page</h1>
+    <p>This page contains QR codes to test the V2 extension with the new Railway server.</p>
+    
+    <div class="status">
+        <strong>Extension Status:</strong> <span id="extensionStatus">Checking...</span><br>
+        <strong>Server:</strong> Railway V2 (https://web-production-c116.up.railway.app/)
+    </div>
+    
+    <div class="qr-container">
+        <h3>Test QR Code 1:</h3>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIQAAACECAYAAABRQR6gAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3Njape.org5vuPBoAAA==" alt="Test QR" style="width: 200px; height: 200px;">
+    </div>
+    
+    <div class="qr-container">
+        <h3>Test QR Code 2:</h3>
+        <canvas id="qrCanvas" width="200" height="200"></canvas>
+    </div>
+    
+    <script>
+        // Check if extension is loaded
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            document.getElementById('extensionStatus').textContent = '✅ Extension Loaded';
+        } else {
+            document.getElementById('extensionStatus').textContent = '❌ Extension Not Found';
+        }
+        
+        // Create a QR code on canvas
+        const canvas = document.getElementById('qrCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Simple QR pattern
+        ctx.fillStyle = '#000';
+        ctx.fillRect(50, 50, 100, 100);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(60, 60, 80, 80);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(70, 70, 60, 60);
+    </script>
+</body>
+</html> 

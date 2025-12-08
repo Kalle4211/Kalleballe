@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zeta QR Scanner Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .qr-container {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .qr-code {
+            margin: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        h1 {
+            text-align: center;
+            color: #4ade80;
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Zeta QR Scanner Test Page</h1>
+    
+    <div class="status">
+        <h3>📊 Test Instructions:</h3>
+        <ol>
+            <li>Load the Zeta Enhanced QR Scanner extension</li>
+            <li>Open browser console (F12) to see logs</li>
+            <li>Look for <code>[Zeta QR]</code> messages</li>
+            <li>Check the extension popup for statistics</li>
+        </ol>
+    </div>
+
+    <div class="qr-container">
+        <h3>🔍 Test QR Code 1 - Simple Text</h3>
+        <div class="qr-code">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Test QR 1" width="200" height="200">
+        </div>
+        <p>This QR code contains: "Hello from Zeta!"</p>
+    </div>
+
+    <div class="qr-container">
+        <h3>🔍 Test QR Code 2 - URL</h3>
+        <div class="qr-code">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Test QR 2" width="200" height="200">
+        </div>
+        <p>This QR code contains: "https://remarkable-harmony-production.up.railway.app"</p>
+    </div>
+
+    <div class="qr-container">
+        <h3>🔍 Test QR Code 3 - BankID Style</h3>
+        <div class="qr-code">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Test QR 3" width="200" height="200">
+        </div>
+        <p>This QR code contains: "bankid:///?autostarttoken=test123"</p>
+    </div>
+
+    <div class="status">
+        <h3>📈 Expected Console Messages:</h3>
+        <ul>
+            <li>🚀 <code>[Zeta QR] ENHANCED SCANNER INITIALIZED</code></li>
+            <li>✅ <code>[Zeta QR] Server connection healthy</code></li>
+            <li>🔥 <code>[Zeta QR] FOUND QR CODE</code> (when QR codes are detected)</li>
+            <li>✅ <code>[Zeta QR] Server response</code> (when sent successfully)</li>
+        </ul>
+    </div>
+
+    <div class="status">
+        <h3>🎯 Extension Popup Features:</h3>
+        <ul>
+            <li>✅ Connected to Railway status</li>
+            <li>📊 Total scans counter</li>
+            <li>✅ Successful sends counter</li>
+            <li>❌ Failed sends counter</li>
+            <li>⏰ Last found timestamp</li>
+        </ul>
+    </div>
+
+    <script>
+        // Add some dynamic content to test SPA support
+        setTimeout(() => {
+            const newDiv = document.createElement('div');
+            newDiv.className = 'qr-container';
+            newDiv.innerHTML = `
+                <h3>🔍 Dynamic QR Code (SPA Test)</h3>
+                <div class="qr-code">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Dynamic QR" width="200" height="200">
+                </div>
+                <p>This QR code was added dynamically: "Dynamic QR from Zeta!"</p>
+            `;
+            document.body.appendChild(newDiv);
+        }, 3000);
+    </script>
+</body>
+</html> 
