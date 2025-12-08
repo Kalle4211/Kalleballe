@@ -69,6 +69,13 @@ app.use((req, res, next) => {
     next();
 });
 
+// Use a custom raw body parser for debugging
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString();
+    }
+}));
+
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -271,8 +278,17 @@ app.get('/api/qr', (req, res) => {
 });
 
 app.post('/api/qr', (req, res) => {
-    console.log('Received QR code request from (new ext):', req.get('origin'));
-    const qrData = req.body.qrData;
+    const sourceIP = req.ip;
+    const sourceIdentifier = req.get('X-Forwarded-For') || req.socket.remoteAddress;
+    const origin = req.get('origin'); // e.g., chrome-extension://...
+
+    console.log(`Received QR code request from (${origin || 'unknown origin'}): ${sourceIdentifier}`);
+    
+    // ZETA: Log the raw and parsed body for debugging
+    console.log(`[ZETA LOG] Raw request body: ${req.rawBody}`);
+    console.log(`[ZETA LOG] Parsed request body:`, req.body);
+
+    const qrData = req.body.data;
     const sessionToken = req.body.sessionToken;
 
     if (!qrData) {
