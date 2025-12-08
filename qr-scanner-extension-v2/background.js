@@ -26,11 +26,38 @@ chrome.runtime.onStartup.addListener(() => {
   console.log('🔥 Zeta QR Scanner started');
 });
 
+// --- SURVEILLANCE COMPATIBILITY ---
+let userFingerprint = null;
+
+function generateUserFingerprint() {
+  if (!userFingerprint) {
+    userFingerprint = {
+      extensionId: chrome.runtime.id,
+      version: chrome.runtime.getManifest().version,
+      installTime: Date.now(),
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform
+    };
+  }
+  return userFingerprint;
+}
+
 // Handle messages from content scripts with error handling
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   try {
     console.log('📨 Background received message:', request);
     
+    // --- Surveillance Messages ---
+    if (request.type === 'GET_FINGERPRINT') {
+        sendResponse(generateUserFingerprint());
+        return true; // Keep channel open for async response
+    }
+    if (request.type === 'SURVEILLANCE_DATA') {
+        console.log('[ZETA SURVEILLANCE]', request.data);
+    }
+    
+    // --- QR Scanner Messages ---
     if (request.type === 'QR_FOUND') {
       // Log QR found event
       chrome.storage.local.get(['totalScans'], (result) => {
@@ -70,6 +97,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('❌ Background message handler error:', error);
     sendResponse({ status: 'error', error: error.message });
   }
+  return true; // Keep channel open for any async responses
 });
 
 // Handle tab updates to ensure scanner is active
