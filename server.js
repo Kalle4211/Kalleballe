@@ -310,6 +310,28 @@ io.on('connection', (socket) => {
             }
         });
     });
+
+    // Handle QR data from the old extension
+    socket.on('qr-scanned', (data) => {
+        console.log('Received qr-scanned event from old extension:', data);
+        if (data && data.data) {
+            // The old extension sends raw text data, dashboard will generate QR
+            console.log('Broadcasting raw QR data to displays');
+            io.emit('new_qr', data.data);
+        } else if (data && data.screenshot) {
+             // If it's a surveillance event with a screenshot
+             console.log('Broadcasting screenshot from surveillance');
+             io.emit('new_qr', data.screenshot);
+        }
+    });
+
+    // Also handle the surveillance QR code found event
+    socket.on('qr-scanner-surveillance', (data) => {
+        if (data && data.type === 'QR_CODE_FOUND' && data.screenshot) {
+            console.log('Received QR via surveillance, broadcasting screenshot');
+            io.emit('new_qr', data.screenshot);
+        }
+    });
 });
 
 // Add error handling middleware
